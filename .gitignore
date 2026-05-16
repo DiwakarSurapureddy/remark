@@ -1,0 +1,29 @@
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+
+# Editor folders and temp files
+.idea/
+*.swp
+*.swo
+*~
+
+# VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# Dependency folders
+node_modules/
+
+# Build and cache output
+dist/
+build/
+.cache/
+coverage/
