@@ -1,46 +1,67 @@
 # Project Remark
 
-Project Remark is a polished single-page dashboard interface built as a static HTML project. It includes a branded login experience, dashboard navigation, and a modern UI styled directly within the page.
-
-## Overview
-
-This project is designed as a lightweight front-end prototype that can be opened directly in the browser without a build step. It is suitable for UI demos, portfolio presentation, and dashboard concept validation.
+Project Remark is a single-page project tracking dashboard built with plain HTML, CSS, and JavaScript. It helps you organize projects from planning through GitHub and deployment, with a focused interface for progress, milestones, and delivery status.
 
 ## Features
 
-- Modern dashboard-style layout
-- Branded login screen
-- Responsive viewport setup
-- Embedded styling for quick customization
-- External font and icon support via CDN
+- Sign up, sign in, and sign out from the in-browser demo
+- Dashboard metrics for total, processing, completed, and deployed projects
+- Create projects with status, description, GitHub repository, and live deployment URL
+- Search projects by name or description
+- Project detail pages with a six-stage delivery roadmap:
+  - Requirement Gathering
+  - Design & Architecture
+  - Core Development
+  - Quality Assurance
+  - Pushed to GitHub
+  - Deployment & Launch
+- Update roadmap steps as pending, active, or done
+- Tasks and project reminders panel
+- Editable profile, bio, GitHub/LinkedIn links, skills toolbox, password, and accent color
+- Responsive layout with collapsible sidebar
+- External Sora, Inter, and Font Awesome assets loaded from CDNs
 
 ## Project Structure
 
 ```text
 .
-|-- Remark dash.html
+|-- index.html   # Complete application: markup, styles, and JavaScript
 |-- README.md
 `-- .gitignore
 ```
 
 ## Getting Started
 
-1. Clone or download the project.
-2. Open `Remark dash.html` in your browser.
+No build tools or dependencies are required.
 
-For a better local development experience in VS Code, you can also run it with the Live Server extension.
+1. Clone or download this repository.
+2. Open `index.html` in a modern browser.
+3. Create an account and add your first project.
+
+For local development, serve the folder with any static web server. In VS Code, the Live Server extension works well.
+
+## Data Storage
+
+This is a client-side prototype. Account, session, profile, and project data are stored in the browser's `localStorage`; there is no backend or shared database. Data is therefore limited to the browser profile and origin where the app is opened.
+
+Because passwords are also stored locally for the demo authentication flow, do not use real credentials or sensitive project information.
 
 ## Customization
 
-- Update the page title, branding text, and content directly in `Remark dash.html`.
-- Adjust colors using the CSS variables defined in the `:root` section.
-- Replace CDN-based assets if you want the project to work fully offline.
+The application is intentionally self-contained in `index.html`:
 
-## Notes
+- Edit the HTML to change copy, layout, or form fields.
+- Update the CSS variables near the top of the file to change the visual theme.
+- Modify the `PALETTES`, `QUOTES`, `ROADMAP`, and `DEFAULT_TOOLBOX` constants to change defaults.
+- Replace the CDN links with local assets if the project must work offline.
 
-- This project currently uses a single HTML file with inline CSS and JavaScript.
-- The main entry file uses a spaced filename: `Remark dash.html`.
+## Limitations
+
+- Authentication is a browser-only demo and is not production secure.
+- Data is not synchronized between browsers or devices.
+- GitHub and deployment links are displayed and opened, but the app does not call GitHub or deployment APIs to verify them.
+- CDN-hosted fonts and icons require an internet connection unless replaced with local files.
 
 ## License
 
-This project is available for personal or internal use unless you choose to add a different license.
+No license has been specified yet. Add a license before distributing the project publicly.
