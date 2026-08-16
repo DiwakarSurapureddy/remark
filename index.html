@@ -386,9 +386,25 @@ td{padding:12px 16px;vertical-align:middle}
 .detail-title{font-family:'Sora',sans-serif;font-size:21px;font-weight:700;color:var(--text);margin-bottom:8px}
 .detail-badges{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 .detail-date{font-size:11px;color:var(--dim)}
+.detail-actions{display:flex;align-items:center;gap:8px}
+.detail-edit-btn,.detail-save-btn,.detail-cancel-btn{padding:7px 13px;border-radius:var(--radius-sm);font-size:11px;font-weight:700;transition:all .18s}
+.detail-edit-btn{color:var(--accent);border:1px solid #c7d2fe;background:#eef2ff}
+.detail-edit-btn:hover{background:var(--accent);color:#fff}
+.detail-save-btn{color:#fff;background:var(--accent)}
+.detail-save-btn:hover{opacity:.88}
+.detail-cancel-btn{color:var(--muted);border:1px solid var(--border);background:#f8fafc}
+.detail-cancel-btn:hover{background:#f1f5f9;color:var(--text)}
 .detail-del-btn{padding:6px 13px;border-radius:var(--radius-sm);font-size:11px;font-weight:600;color:var(--red);border:1px solid #fecaca;background:#fff;transition:all .18s}
 .detail-del-btn:hover{background:#fef2f2}
 .detail-del-btn i{margin-right:4px}
+.project-edit-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;padding:16px;border:1px solid #c7d2fe;border-radius:12px;background:#f8faff}
+.project-edit-form .edit-field{display:flex;flex-direction:column;gap:5px}
+.project-edit-form .edit-field.full{grid-column:1/-1}
+.project-edit-form label{font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.7px;text-transform:uppercase}
+.project-edit-form input,.project-edit-form textarea{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text);font-size:12px;outline:none}
+.project-edit-form textarea{min-height:72px;resize:vertical;line-height:1.5}
+.project-edit-form input:focus,.project-edit-form textarea:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-light)}
+.edit-actions{grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px}
 
 /* link boxes in detail */
 .detail-links{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
@@ -588,6 +604,10 @@ td{padding:12px 16px;vertical-align:middle}
   .content{padding:16px}
   .topbar{padding:0 16px;height:54px}
   .stats-grid{grid-template-columns:1fr 1fr}
+  .detail-top{gap:12px;flex-direction:column}
+  .detail-actions{width:100%;justify-content:flex-end}
+  .project-edit-form{grid-template-columns:1fr}
+  .project-edit-form .edit-field.full,.edit-actions{grid-column:auto}
 }
 </style>
 </head>
@@ -1012,7 +1032,7 @@ const DEFAULT_TOOLBOX=[
 let currentUser=null, projects=[], deleteTargetId=null;
 let pickedColor='#4f46e5', isLoginMode=true, detailProjId=null;
 let sidebarCollapsed=false, searchQuery='';
-let lastCollectionPage='dashboard';
+let lastCollectionPage='dashboard', editingProject=false;
 
 /* ════════════════════════════════════
    STORAGE
@@ -1545,6 +1565,7 @@ function openDetail(id,e){
   const backLabel=document.getElementById('detail-back-label');
   if(backLabel)backLabel.textContent=lastCollectionPage==='projects'?'Back to My Project':'Back to Dashboard';
   detailProjId=id;
+  editingProject=false;
   renderDetail();
   showPage('detail');
 }
@@ -1563,6 +1584,33 @@ function setStepState(projId,idx,state){
   if(doneCount===p.steps.length){p.status='Completed';}
   else if(p.status==='Completed'){p.status='Processing';}
   saveProj(currentUser.username,projects);
+  renderDetail();
+}
+function startProjectEdit(){
+  if(!projects.find(p=>p.id===detailProjId))return;
+  editingProject=true;
+  renderDetail();
+}
+function cancelProjectEdit(){
+  editingProject=false;
+  renderDetail();
+}
+function saveProjectEdit(e){
+  e.preventDefault();
+  const p=projects.find(x=>x.id===detailProjId);
+  if(!p)return;
+  const form=e.target;
+  p.desc=form.projectDesc.value.trim();
+  p.githubUrl=form.githubUrl.value.trim()
+    .replace(/^https?:\/\/github\.com\//i,'')
+    .replace(/^github\.com\//i,'')
+    .replace(/\/$/,'');
+  p.deployUrl=form.deployUrl.value.trim()
+    .replace(/^https?:\/\//i,'')
+    .replace(/\/$/,'');
+  p.deployed=p.deployUrl?'Yes':'No';
+  saveProj(currentUser.username,projects);
+  editingProject=false;
   renderDetail();
 }
 function renderDetail(){
@@ -1621,6 +1669,13 @@ function renderDetail(){
   const ai=isComp
     ?`<strong>${esc(p.name)}</strong> has been delivered successfully${p.deployed==='Yes'?' and is now ready for production review':''}. Capture lessons learned, confirm release notes, and keep repository and deployment links available for future reference.`
     :`<strong>${esc(p.name)}</strong> is currently ${p.progress}% complete. Keep the next milestone visible, maintain the GitHub record, and publish the live URL as soon as release validation is complete.`;
+  const editPanel=editingProject?`
+    <form class="project-edit-form" onsubmit="saveProjectEdit(event)">
+      <div class="edit-field full"><label for="edit-project-desc">Description</label><textarea id="edit-project-desc" name="projectDesc" placeholder="Add a short project description...">${esc(p.desc)}</textarea></div>
+      <div class="edit-field"><label for="edit-github-url">GitHub Repository URL</label><input id="edit-github-url" name="githubUrl" value="${esc(p.githubUrl)}" placeholder="username/repository"/></div>
+      <div class="edit-field"><label for="edit-deploy-url">Live Project URL</label><input id="edit-deploy-url" name="deployUrl" value="${esc(p.deployUrl)}" placeholder="your-app.vercel.app"/></div>
+      <div class="edit-actions"><button type="button" class="detail-cancel-btn" onclick="cancelProjectEdit()">Cancel</button><button type="submit" class="detail-save-btn"><i class="fa-solid fa-check"></i> Save changes</button></div>
+    </form>`:'';
 
   document.getElementById('detail-content').innerHTML=`
     <div class="detail-hero">
@@ -1633,14 +1688,17 @@ function renderDetail(){
             <span class="detail-date">Created ${p.createdAt||'—'}</span>
           </div>
         </div>
-        <button class="detail-del-btn" onclick="openDelModal(${p.id})"><i class="fa-solid fa-trash-can"></i>Delete</button>
+        <div class="detail-actions">
+          ${editingProject?'':`<button class="detail-edit-btn" onclick="startProjectEdit()"><i class="fa-solid fa-pen"></i> Edit</button>`}
+          <button class="detail-del-btn" onclick="openDelModal(${p.id})"><i class="fa-solid fa-trash-can"></i>Delete</button>
+        </div>
       </div>
       <div class="prog-section">
         <div class="prog-section-header"><span>Overall Progress</span><span>${p.progress}%</span></div>
         <div class="prog-track-lg"><div class="prog-fill-lg ${cls}" style="width:${p.progress}%"></div></div>
       </div>
-      ${p.desc?`<div class="desc-bar" style="border-left-color:${pickedColor};background:${pal.light}"><p>${esc(p.desc)}</p></div>`:''}
-      <div class="detail-links">${ghBox}${depBox}</div>
+      ${editingProject?editPanel:(p.desc?`<div class="desc-bar" style="border-left-color:${pickedColor};background:${pal.light}"><p>${esc(p.desc)}</p></div>`:'')}
+      ${editingProject?'':`<div class="detail-links">${ghBox}${depBox}</div>`}
     </div>
 
     <div class="ai-card">
