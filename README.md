@@ -1,6 +1,6 @@
 # Project Remark
 
-Project Remark is a single-page project tracking dashboard built with plain HTML, CSS, and JavaScript. It helps you organize projects from planning through GitHub and deployment, with a focused interface for progress, milestones, and delivery status.
+Project Remark is a single-page project tracking dashboard built with clean, component-based HTML, CSS, and JavaScript. It helps you organize projects from planning through GitHub and deployment, with a focused interface for progress, milestones, and delivery status.
 
 ## Features
 
@@ -24,10 +24,25 @@ Project Remark is a single-page project tracking dashboard built with plain HTML
 ## Project Structure
 
 ```text
-.
-|-- index.html   # Complete application: markup, styles, and JavaScript
-|-- README.md
-`-- .gitignore
+REMARK/
+├── index.html                  # Minimal HTML shell (~70 lines)
+├── css/
+│   └── styles.css              # Extracted CSS design tokens, resets, & component styles
+├── js/
+│   ├── config.js               # Constants, palettes, default bio/toolbox data, and quotes
+│   ├── storage.js              # LocalStorage persistence & user/project normalization helpers
+│   ├── components/
+│   │   ├── sidebar.js          # Sidebar component (brand, nav, search, attention reminders, user footer)
+│   │   ├── profile.js          # Profile drawer component & canvas completion pie chart
+│   │   └── tasks.js            # Tasks & Reminders overlay drawer component
+│   ├── views/
+│   │   ├── dashboard.js        # Dashboard page view (4 metric cards, creation form)
+│   │   ├── projects.js         # My Project portfolio table container view
+│   │   ├── detail.js           # Project Detail view & 6-step roadmap timeline container
+│   │   └── settings.js         # Settings & credentials view
+│   ├── ui.js                   # Navigation, rendering functions, modals, theme & profile handlers
+│   └── app.js                  # Main application bootloader
+└── README.md                   # Project documentation
 ```
 
 ## Getting Started
@@ -35,7 +50,7 @@ Project Remark is a single-page project tracking dashboard built with plain HTML
 No build tools or dependencies are required.
 
 1. Clone or download this repository.
-2. Open `index.html` in a modern browser.
+2. Open `index.html` directly in a modern browser (works via `file://` or HTTP server).
 3. Create an account and add your first project.
 
 For local development, serve the folder with any static web server. In VS Code, the Live Server extension works well.
@@ -48,19 +63,12 @@ Because passwords are also stored locally for the demo authentication flow, do n
 
 ## Customization
 
-The application is intentionally self-contained in `index.html`:
+The project is cleanly separated into component and view modules:
 
-- Edit the HTML to change copy, layout, or form fields.
-- Update the CSS variables near the top of the file to change the visual theme.
-- Modify the `PALETTES`, `QUOTES`, `ROADMAP`, and `DEFAULT_TOOLBOX` constants to change defaults.
-- Replace the CDN links with local assets if the project must work offline.
-
-## Limitations
-
-- Authentication is a browser-only demo and is not production secure.
-- Data is not synchronized between browsers or devices.
-- GitHub and deployment links are displayed and opened, but the app does not call GitHub or deployment APIs to verify them.
-- CDN-hosted fonts and icons require an internet connection unless replaced with local files.
+- **Components (`js/components/`)**: Modify `sidebar.js`, `profile.js`, or `tasks.js` to customize reusable UI modules.
+- **Page Views (`js/views/`)**: Modify `dashboard.js`, `projects.js`, `detail.js`, or `settings.js` to change view layouts.
+- **Styling (`css/styles.css`)**: Modify design tokens (`:root`), theme colors, responsive breakpoints, or component styles.
+- **Configuration (`js/config.js`)**: Modify `PALETTES`, `QUOTES`, `ROADMAP`, and `DEFAULT_TOOLBOX` constants.
 
 ## License
 
