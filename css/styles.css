@@ -600,3 +600,75 @@ td{padding:12px 16px;vertical-align:middle}
   .project-edit-form{grid-template-columns:1fr}
   .project-edit-form .edit-field.full,.edit-actions{grid-column:auto}
 }
+
+/* ═══════════════════════════════════════════
+   PROJECT ORGANIZATION & DRAG AND DROP
+═══════════════════════════════════════════ */
+.org-toolbar{
+  background:var(--card);border-radius:var(--radius);padding:16px 20px;
+  box-shadow:var(--shadow);margin-bottom:20px;display:flex;align-items:center;
+  justify-content:space-between;gap:14px;flex-wrap:wrap;
+}
+.org-toolbar-title{font-family:'Sora',sans-serif;font-size:14px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px}
+.org-toolbar-title i{color:var(--accent)}
+.org-add-form{display:flex;align-items:center;gap:8px}
+.org-add-input{
+  padding:8px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);
+  background:#f8fafc;font-size:12px;color:var(--text);outline:none;
+  transition:box-shadow .18s,border-color .18s;width:220px;
+}
+.org-add-input:focus{box-shadow:0 0 0 2px var(--accent);border-color:transparent;background:#fff}
+.org-add-btn{
+  padding:8px 14px;border-radius:var(--radius-sm);background:var(--accent);
+  color:#fff;font-size:12px;font-weight:700;transition:opacity .18s;white-space:nowrap;
+}
+.org-add-btn:hover{opacity:.88}
+
+/* Recently Uploaded Cards */
+.recently-uploaded-card{
+  background:var(--card);border-radius:var(--radius);padding:18px 20px;
+  box-shadow:var(--shadow);margin-bottom:20px;border-top:3px solid var(--accent);
+}
+.recent-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.recent-card-header h3{font-family:'Sora',sans-serif;font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:7px}
+.recent-card-header h3 i{color:var(--accent)}
+.recent-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+
+.recent-item{
+  background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:14px;
+  cursor:grab;transition:transform .18s,box-shadow .18s,border-color .18s;position:relative;
+}
+.recent-item:active{cursor:grabbing}
+.recent-item:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:var(--accent)}
+.recent-item.dragging{opacity:.4;border:2px dashed var(--accent)}
+.recent-item-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.recent-item-title{font-family:'Sora',sans-serif;font-weight:700;font-size:13px;color:var(--text);display:flex;align-items:center;gap:8px}
+.recent-grip{color:var(--dim);font-size:12px;cursor:grab}
+
+/* Custom Sections Grid */
+.custom-sections-grid{display:flex;flex-direction:column;gap:16px;margin-bottom:24px}
+.custom-section-box{
+  background:var(--card);border-radius:var(--radius);padding:18px 20px;
+  box-shadow:var(--shadow);border:2px dashed var(--border);transition:all .2s ease;
+}
+.custom-section-box.drop-zone-active{
+  border-color:var(--accent);background:var(--accent-light);
+  box-shadow:0 0 0 4px rgba(var(--accent-rgb),.15);
+}
+.section-box-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.section-box-title{font-family:'Sora',sans-serif;font-size:14px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px}
+.section-box-title i{color:var(--accent)}
+.section-box-count{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:#f1f5f9;color:var(--muted)}
+.section-box-actions{display:flex;align-items:center;gap:6px}
+.sec-btn{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:11px;transition:all .15s}
+.sec-btn:hover{background:#f1f5f9;color:var(--text)}
+.sec-btn.del:hover{background:#fef2f2;color:var(--red)}
+
+.section-items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;min-height:48px;padding:4px}
+.section-empty-hint{font-size:12px;color:var(--dim);text-align:center;padding:16px;width:100%;grid-column:1/-1;border:1px dashed var(--border);border-radius:10px;background:#fafbfd}
+
+/* Draggable Table Rows */
+tr.draggable-row{cursor:grab}
+tr.draggable-row:active{cursor:grabbing}
+tr.draggable-row.dragging{opacity:.3;background:var(--accent-light)}
+

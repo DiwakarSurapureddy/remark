@@ -129,8 +129,8 @@ function applyAccent(hex) {
   root.style.setProperty('--sidebar-strong', `rgba(${r},${g},${b},.22)`);
   root.style.setProperty('--sidebar-border', `rgba(${r},${g},${b},.28)`);
   document.querySelectorAll('.avatar').forEach(a => a.style.background = hex);
-  document.querySelectorAll('.f-submit,.save-btn').forEach(b => b.style.background = hex);
-  document.querySelectorAll('.card-title i, .add-card h3 i').forEach(i => i.style.color = hex);
+  document.querySelectorAll('.f-submit,.save-btn,.org-add-btn').forEach(b => b.style.background = hex);
+  document.querySelectorAll('.card-title i, .add-card h3 i, .org-toolbar-title i, .recent-card-header h3 i, .section-box-title i').forEach(i => i.style.color = hex);
   document.querySelectorAll('.ai-badge').forEach(b => b.style.background = hex);
   document.querySelectorAll('.nav-item.active').forEach(n => {
     n.style.background = `linear-gradient(90deg,rgba(${r},${g},${b},.18) 0%,rgba(${r},${g},${b},.06) 100%)`;
@@ -208,11 +208,14 @@ function doRegister(e) {
 }
 
 function startSession(user) {
-  currentUser = normalizeUser(user); projects = normalizeProjects(getProj(user.username));
+  currentUser = normalizeUser(user);
+  projects = normalizeProjects(getProj(user.username));
+  customSections = getSections(user.username);
   pickedColor = user.color || '#4f46e5';
   localStorage.setItem('session', user.username);
   saveUser(currentUser);
   saveProj(user.username, projects);
+  saveSections(user.username, customSections);
   document.getElementById('login-screen').classList.add('hidden');
   document.getElementById('app').classList.add('visible');
   applyAccent(pickedColor);
@@ -222,7 +225,7 @@ function startSession(user) {
 }
 
 function doLogout() {
-  currentUser = null; projects = [];
+  currentUser = null; projects = []; customSections = [];
   localStorage.removeItem('session');
   document.getElementById('app').classList.remove('visible');
   document.getElementById('login-screen').classList.remove('hidden');
@@ -307,6 +310,181 @@ function showPage(name) {
 }
 
 /* ════════════════════════════════════
+   DRAG & DROP & SECTION MANAGEMENT
+════════════════════════════════════ */
+function handleDragStart(e, id) {
+  draggedProjectId = id;
+  if (e.dataTransfer) {
+    e.dataTransfer.setData('text/plain', String(id));
+    e.dataTransfer.effectAllowed = 'move';
+  }
+  const target = e.currentTarget;
+  target.classList.add('dragging');
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+  const box = e.currentTarget.closest('.custom-section-box');
+  if (box) box.classList.add('drop-zone-active');
+}
+
+function handleDragLeave(e) {
+  const box = e.currentTarget.closest('.custom-section-box');
+  if (box) box.classList.remove('drop-zone-active');
+}
+
+function handleDrop(e, targetSectionId) {
+  e.preventDefault();
+  const box = e.currentTarget.closest('.custom-section-box');
+  if (box) box.classList.remove('drop-zone-active');
+  
+  const idStr = e.dataTransfer ? e.dataTransfer.getData('text/plain') : String(draggedProjectId);
+  const projId = Number(idStr || draggedProjectId);
+  const p = projects.find(x => x.id === projId);
+  if (p) {
+    p.sectionId = targetSectionId;
+    saveProj(currentUser.username, projects);
+    renderTable();
+  }
+}
+
+function handleDragEnd(e) {
+  document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
+  document.querySelectorAll('.drop-zone-active').forEach(el => el.classList.remove('drop-zone-active'));
+  draggedProjectId = null;
+}
+
+function createCustomSection(e) {
+  e.preventDefault();
+  const input = e.target.sectionName;
+  const name = input.value.trim();
+  if (!name) return;
+  const sec = { id: 'sec_' + Date.now(), name };
+  customSections.push(sec);
+  saveSections(currentUser.username, customSections);
+  input.value = '';
+  renderTable();
+}
+
+function renameCustomSection(sectionId) {
+  const sec = customSections.find(s => s.id === sectionId);
+  if (!sec) return;
+  const newName = prompt('Enter new section name:', sec.name);
+  if (newName && newName.trim()) {
+    sec.name = newName.trim();
+    saveSections(currentUser.username, customSections);
+    renderTable();
+  }
+}
+
+function deleteCustomSection(sectionId) {
+  if (!confirm('Are you sure you want to delete this section? Projects in this section will be unassigned.')) return;
+  customSections = customSections.filter(s => s.id !== sectionId);
+  projects.forEach(p => {
+    if (p.sectionId === sectionId) p.sectionId = null;
+  });
+  saveSections(currentUser.username, customSections);
+  saveProj(currentUser.username, projects);
+  renderTable();
+}
+
+function removeProjectFromSection(projId) {
+  const p = projects.find(x => x.id === projId);
+  if (p) {
+    p.sectionId = null;
+    saveProj(currentUser.username, projects);
+    renderTable();
+  }
+}
+
+function renderOrganizationSections() {
+  // 1. Recently Uploaded Grid
+  const recentGrid = document.getElementById('recently-uploaded-grid');
+  const recentWrapper = document.getElementById('recently-uploaded-wrapper');
+  if (recentGrid) {
+    const recentProjects = [...projects].reverse().slice(0, 4);
+    if (!recentProjects.length) {
+      if (recentWrapper) recentWrapper.style.display = 'none';
+    } else {
+      if (recentWrapper) recentWrapper.style.display = 'block';
+      recentGrid.innerHTML = recentProjects.map(p => {
+        const init = p.name.slice(0, 2).toUpperCase();
+        const isComp = p.status === 'Completed';
+        const cls = isComp ? 'green' : 'orange';
+        const secName = p.sectionId ? (customSections.find(s => s.id === p.sectionId)?.name || 'Categorized') : 'Unassigned';
+        return `
+          <div class="recent-item" draggable="true" ondragstart="handleDragStart(event, ${p.id})" ondragend="handleDragEnd(event)" onclick="openDetail(${p.id}, event)">
+            <div class="recent-item-top">
+              <span class="recent-item-title">
+                <i class="fa-solid fa-grip-vertical recent-grip" title="Drag to organize"></i>
+                <div class="proj-icon" style="width:22px;height:22px;font-size:8px;background:${pickedColor};border-radius:5px">${init}</div>
+                ${esc(p.name)}
+              </span>
+              <span class="pill ${cls}"><span class="pill-dot"></span>${p.status}</span>
+            </div>
+            ${p.desc ? `<div class="proj-desc-text" style="margin-bottom:8px">${esc(p.desc.slice(0, 40))}${p.desc.length > 40 ? '…' : ''}</div>` : ''}
+            <div style="display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:6px">
+              <span><i class="fa-solid fa-folder-tree" style="margin-right:4px"></i>${esc(secName)}</span>
+              <span class="prog-pct">${p.progress}%</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  // 2. Custom Sections Grid Drop Zones
+  const customGrid = document.getElementById('custom-sections-container');
+  if (customGrid) {
+    if (!customSections.length) {
+      customGrid.innerHTML = '';
+    } else {
+      customGrid.innerHTML = customSections.map(sec => {
+        const secProjects = projects.filter(p => p.sectionId === sec.id);
+        const itemsHTML = secProjects.length ? secProjects.map(p => {
+          const init = p.name.slice(0, 2).toUpperCase();
+          const isComp = p.status === 'Completed';
+          const cls = isComp ? 'green' : 'orange';
+          return `
+            <div class="recent-item" draggable="true" ondragstart="handleDragStart(event, ${p.id})" ondragend="handleDragEnd(event)" onclick="openDetail(${p.id}, event)" style="background:#fff">
+              <div class="recent-item-top">
+                <span class="recent-item-title">
+                  <i class="fa-solid fa-grip-vertical recent-grip"></i>
+                  <div class="proj-icon" style="width:20px;height:20px;font-size:8px;background:${pickedColor};border-radius:4px">${init}</div>
+                  ${esc(p.name)}
+                </span>
+                <button class="sec-btn del" onclick="event.stopPropagation(); removeProjectFromSection(${p.id})" title="Remove from section"><i class="fa-solid fa-xmark"></i></button>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">
+                <span class="pill ${cls}" style="font-size:9px"><span class="pill-dot"></span>${p.status}</span>
+                <span style="font-size:10px;font-weight:700;color:var(--muted)">${p.progress}%</span>
+              </div>
+            </div>
+          `;
+        }).join('') : `<div class="section-empty-hint"><i class="fa-solid fa-hand-pointer" style="margin-right:6px"></i>Drag projects here to add to "${esc(sec.name)}"</div>`;
+
+        return `
+          <div class="custom-section-box" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, '${sec.id}')">
+            <div class="section-box-header">
+              <div class="section-box-title sora">
+                <i class="fa-solid fa-folder-open"></i> ${esc(sec.name)}
+                <span class="section-box-count">${secProjects.length} project${secProjects.length !== 1 ? 's' : ''}</span>
+              </div>
+              <div class="section-box-actions">
+                <button class="sec-btn" onclick="renameCustomSection('${sec.id}')" title="Rename section"><i class="fa-solid fa-pen"></i></button>
+                <button class="sec-btn del" onclick="deleteCustomSection('${sec.id}')" title="Delete section"><i class="fa-solid fa-trash-can"></i></button>
+              </div>
+            </div>
+            <div class="section-items-grid">${itemsHTML}</div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+}
+
+/* ════════════════════════════════════
    DASHBOARD & TABLE RENDERING
 ════════════════════════════════════ */
 function renderDashboard() {
@@ -324,6 +502,8 @@ function renderDashboard() {
 }
 
 function renderTable() {
+  renderOrganizationSections();
+
   const tbody = document.getElementById('proj-tbody');
   if (!tbody) return;
   const filtered = searchQuery
@@ -362,8 +542,9 @@ function renderTable() {
           <span class="table-link-meta">${getDeployStatus(p)}</span>
         </div>`;
 
-    return `<tr onclick="openDetail(${p.id},event)">
+    return `<tr class="draggable-row" draggable="true" ondragstart="handleDragStart(event, ${p.id})" ondragend="handleDragEnd(event)" onclick="openDetail(${p.id},event)">
       <td><div class="td-name">
+        <i class="fa-solid fa-grip-vertical recent-grip" style="margin-right:4px"></i>
         <div class="proj-icon" style="background:${pickedColor}">${init}</div>
         <div><div class="proj-name-text">${esc(p.name)}</div>${p.desc ? `<div class="proj-desc-text">${esc(p.desc.slice(0, 30))}${p.desc.length > 30 ? '…' : ''}</div>` : ''}</div>
       </div></td>
@@ -441,7 +622,7 @@ function confirmDelete() {
    DETAIL PAGE & ROADMAP CONTROLS
 ════════════════════════════════════ */
 function openDetail(id, e) {
-  if (e && e.target.closest('.del-btn,.link-badge,.table-link')) return;
+  if (e && e.target.closest('.del-btn,.link-badge,.table-link,.sec-btn')) return;
   const active = document.querySelector('.page.active');
   lastCollectionPage = active && active.id === 'page-projects' ? 'projects' : 'dashboard';
   const backLabel = document.getElementById('detail-back-label');
@@ -812,7 +993,9 @@ function saveSettings(e) {
 
 function clearAllProjects() {
   if (!confirm('Delete ALL projects permanently? This cannot be undone.')) return;
-  projects = []; saveProj(currentUser.username, []);
+  projects = []; customSections = [];
+  saveProj(currentUser.username, []);
+  saveSections(currentUser.username, []);
   updateSidebar(); updateReminders(); renderSettings();
   alert('All projects deleted.');
 }

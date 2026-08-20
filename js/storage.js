@@ -3,6 +3,7 @@
 ════════════════════════════════════ */
 let currentUser = null;
 let projects = [];
+let customSections = [];
 let deleteTargetId = null;
 let pickedColor = '#4f46e5';
 let isLoginMode = true;
@@ -11,6 +12,7 @@ let sidebarCollapsed = false;
 let searchQuery = '';
 let lastCollectionPage = 'dashboard';
 let editingProject = false;
+let draggedProjectId = null;
 
 /* ════════════════════════════════════
    LOCAL STORAGE PERSISTENCE
@@ -31,6 +33,13 @@ const getProj = u => {
 };
 
 const saveProj = (u, p) => localStorage.setItem('p_' + u, JSON.stringify(p));
+
+const getSections = u => {
+  try { return JSON.parse(localStorage.getItem('s_' + u)) || []; }
+  catch { return []; }
+};
+
+const saveSections = (u, s) => localStorage.setItem('s_' + u, JSON.stringify(s));
 
 /* ════════════════════════════════════
    DATA NORMALIZATION HELPERS
@@ -99,6 +108,7 @@ function normalizeProject(raw) {
   const project = { ...raw };
   project.name = (project.name || 'Untitled Project').trim();
   project.desc = (project.desc || '').trim();
+  project.sectionId = project.sectionId || null;
   project.githubUrl = String(project.githubUrl || '').trim()
     .replace(/^https?:\/\/github\.com\//, '')
     .replace(/^github\.com\//, '')
