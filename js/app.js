@@ -42,7 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Restore Saved Session if available
   const savedSession = localStorage.getItem('session');
   if (savedSession) {
-    const u = getUser(savedSession);
-    if (u) startSession(u);
+    apiFetchUser(savedSession).then(u => {
+      if (u) startSession(u);
+    });
   }
 });

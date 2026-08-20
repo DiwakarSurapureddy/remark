@@ -189,27 +189,80 @@ function renderAuthForm() {
 function switchAuth() { isLoginMode = !isLoginMode; renderAuthForm(); }
 function setErr(m) { const e = document.getElementById('auth-err'); if (e) e.textContent = m; }
 
-function doLogin(e) {
+async function doLogin(e) {
   e.preventDefault();
   const u = e.target.u.value.trim(), p = e.target.p.value;
-  const st = getUser(u);
-  if (!st || st.password !== p) { setErr('Invalid username or password.'); return; }
-  startSession(st);
+  setErr('');
+
+  // 1. Check local storage user first (case-insensitive)
+  const localUser = getUser(u);
+
+  // 2. Try backend login
+  const apiRes = await apiLoginUser(u, p);
+  if (apiRes && apiRes.success) {
+    await startSession({ ...apiRes.user, password: p });
+    return;
+  }
+
+  // 3. If local user exists from previous session, auto-migrate user & login
+  if (localUser) {
+    if (localUser.password === p) {
+      await apiRegisterUser(localUser.username, p);
+      await startSession(localUser);
+      return;
+    } else {
+      setErr('Invalid password for ' + localUser.username + '.');
+      return;
+    }
+  }
+
+  setErr('Invalid username or password.');
 }
 
-function doRegister(e) {
+async function doRegister(e) {
   e.preventDefault();
   const u = e.target.u.value.trim(), p = e.target.p.value, p2 = e.target.p2.value;
-  if (getUser(u)) { setErr('Username already taken.'); return; }
+  setErr('');
+
   if (p.length < 4) { setErr('Password must be at least 4 characters.'); return; }
   if (p !== p2) { setErr('Passwords do not match.'); return; }
+
+  // Try backend registration first
+  const apiRes = await apiRegisterUser(u, p);
+  if (apiRes) {
+    if (!apiRes.success) {
+      setErr(apiRes.message || 'Registration failed.');
+      return;
+    }
+    const nu = { ...apiRes.user, password: p, color: apiRes.user.color || '#4f46e5', bio: apiRes.user.bio || DEFAULT_BIO, githubProfile: '', linkedinProfile: '', toolbox: DEFAULT_TOOLBOX };
+    await startSession(nu);
+    return;
+  }
+
+  // Fallback to local storage
+  if (getUser(u)) { setErr('Username already taken.'); return; }
   const nu = { username: u, password: p, color: '#4f46e5', bio: DEFAULT_BIO, githubProfile: '', linkedinProfile: '', toolbox: DEFAULT_TOOLBOX };
-  saveUser(nu); startSession(nu);
+  saveUser(nu);
+  await startSession(nu);
 }
 
-function startSession(user) {
+async function startSession(user) {
   currentUser = normalizeUser(user);
-  projects = normalizeProjects(getProj(user.username));
+  
+  // Fetch projects from MongoDB API
+  const dbProjects = await apiFetchProjects(user.username);
+  const localProjList = getProj(user.username);
+
+  if (dbProjects && dbProjects.length > 0) {
+    projects = normalizeProjects(dbProjects);
+  } else if (localProjList && localProjList.length > 0) {
+    // 🔥 AUTO MIGRATION: Push existing localStorage 10 projects straight into MongoDB!
+    projects = normalizeProjects(localProjList);
+    apiSaveProjects(user.username, projects);
+  } else {
+    projects = [];
+  }
+  
   customSections = getSections(user.username);
   pickedColor = user.color || '#4f46e5';
   localStorage.setItem('session', user.username);

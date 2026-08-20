@@ -14,25 +14,66 @@ let lastCollectionPage = 'dashboard';
 let editingProject = false;
 let draggedProjectId = null;
 
+const API_BASE_URL = 'http://localhost:5000/api';
+
 /* ════════════════════════════════════
-   LOCAL STORAGE PERSISTENCE
+   BACKEND API & LOCAL STORAGE PERSISTENCE
 ════════════════════════════════════ */
 const getUser = u => {
-  try { return normalizeUser(JSON.parse(localStorage.getItem('u_' + u))); }
-  catch { return null; }
+  if (!u) return null;
+  try {
+    const raw = localStorage.getItem('u_' + u);
+    if (raw) return normalizeUser(JSON.parse(raw));
+  } catch (e) {}
+  return findLocalUser(u);
 };
 
-const saveUser = o => {
-  const user = normalizeUser(o);
-  localStorage.setItem('u_' + user.username, JSON.stringify(user));
+const findLocalUser = u => {
+  if (!u) return null;
+  try {
+    const clean = String(u).trim().toLowerCase();
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.toLowerCase().startsWith('u_')) {
+        const uname = key.slice(2).trim();
+        if (uname.toLowerCase() === clean) {
+          const raw = localStorage.getItem(key);
+          if (raw) return normalizeUser(JSON.parse(raw));
+        }
+      }
+    }
+  } catch (e) {}
+  return null;
 };
 
 const getProj = u => {
-  try { return JSON.parse(localStorage.getItem('p_' + u)) || []; }
-  catch { return []; }
+  if (!u) return [];
+  try {
+    const raw = localStorage.getItem('p_' + u);
+    if (raw) return JSON.parse(raw) || [];
+  } catch (e) {}
+  
+  // Case-insensitive fallback
+  try {
+    const clean = String(u).trim().toLowerCase();
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.toLowerCase().startsWith('p_')) {
+        const uname = key.slice(2).trim();
+        if (uname.toLowerCase() === clean) {
+          const raw = localStorage.getItem(key);
+          if (raw) return JSON.parse(raw) || [];
+        }
+      }
+    }
+  } catch (e) {}
+  return [];
 };
 
-const saveProj = (u, p) => localStorage.setItem('p_' + u, JSON.stringify(p));
+const saveProj = (u, p) => {
+  localStorage.setItem('p_' + u, JSON.stringify(p));
+  apiSaveProjects(u, p);
+};
 
 const getSections = u => {
   try { return JSON.parse(localStorage.getItem('s_' + u)) || []; }
@@ -40,6 +81,86 @@ const getSections = u => {
 };
 
 const saveSections = (u, s) => localStorage.setItem('s_' + u, JSON.stringify(s));
+
+/* Backend Async Helpers */
+async function apiLoginUser(username, password) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.warn('Backend API unreachable, using local fallback:', err);
+    return null;
+  }
+}
+
+async function apiRegisterUser(username, password) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.warn('Backend API unreachable, using local fallback:', err);
+    return null;
+  }
+}
+
+async function apiFetchUser(username) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/users/${username}`);
+    const data = await res.json();
+    if (data.success && data.user) return normalizeUser(data.user);
+  } catch (err) {
+    console.warn('Backend API unreachable for user fetch:', err);
+  }
+  return getUser(username);
+}
+
+async function apiSaveUser(user) {
+  try {
+    await fetch(`${API_BASE_URL}/users/${user.username}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(user)
+    });
+  } catch (err) {
+    console.warn('Failed to sync user with backend server:', err);
+  }
+}
+
+async function apiFetchProjects(username) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/projects/${username}`);
+    const data = await res.json();
+    if (data.success && Array.isArray(data.projects)) {
+      return normalizeProjects(data.projects);
+    }
+  } catch (err) {
+    console.warn('Backend API unreachable for projects fetch:', err);
+  }
+  return getProj(username);
+}
+
+async function apiSaveProjects(username, projectsList) {
+  try {
+    await fetch(`${API_BASE_URL}/projects/sync/${username}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ projects: projectsList })
+    });
+  } catch (err) {
+    console.warn('Failed to sync projects with backend server:', err);
+  }
+}
+
 
 /* ════════════════════════════════════
    DATA NORMALIZATION HELPERS
