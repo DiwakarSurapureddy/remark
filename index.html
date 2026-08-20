@@ -1,98 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Project Remark</title>
-  
+
   <!-- Fonts & Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-  
+  <link
+    href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
   <!-- Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css"/>
+  <link rel="stylesheet" href="css/styles.css" />
 </head>
+
 <body>
 
-<!-- LOGIN SCREEN -->
-<div id="login-screen">
-  <div class="login-left">
-    <div class="brand-pill">
-      <svg class="remark-logo" viewBox="0 0 18 20" aria-hidden="true"><defs><linearGradient id="logoGlossGradLogin" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#c7d2fe"/></linearGradient></defs><path d="M16 4.2C14.3 2.8 12.3 2.1 10 2.1 7.6 2.1 6.3 2.8 6.3 4c0 1.1 1.1 1.6 4.1 2.4l1.5.4c3.9 1 5.9 2.9 5.9 6 0 3.9-3.4 6.2-8.8 6.2-3.8 0-6.9-1.1-9-3.3l2.6-3c1.7 1.7 3.9 2.6 6.6 2.6 2.5 0 3.9-.8 3.9-2.1 0-1.1-1.1-1.7-4-2.4l-1.6-.4c-3.9-1-6-3-6-6C1.5.7 4.8-1.5 9.9-1.5c3.3 0 6.1.9 8.2 2.6z" fill="url(#logoGlossGradLogin)" transform="translate(-1.5 1.5)"/></svg>
-      <span>Project Remark</span>
-    </div>
-    <h1 class="sora">Track Every<br/><span class="c1">Milestone.</span><br/>Deliver with<br/><span class="c2">Confidence.</span></h1>
-    <p class="tagline">One place to plan, track, and ship every project — from first commit to live deployment.</p>
-    <div class="feat-list">
-      <div class="feat-item"><div class="feat-dot"></div>Full project lifecycle tracking</div>
-      <div class="feat-item"><div class="feat-dot"></div>GitHub & deployment URL management</div>
-      <div class="feat-item"><div class="feat-dot"></div>Interactive roadmap with GitHub release checks</div>
-      <div class="feat-item"><div class="feat-dot"></div>Live completion analytics & pie charts</div>
-    </div>
-  </div>
-  <div class="login-right">
-    <div class="login-card fade-up">
-      <div class="lc-brand">
-        <div class="lc-icon"><svg class="remark-logo" viewBox="0 0 18 20" aria-hidden="true"><defs><linearGradient id="logoGlossGradCard" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#c7d2fe"/></linearGradient></defs><path d="M16 4.2C14.3 2.8 12.3 2.1 10 2.1 7.6 2.1 6.3 2.8 6.3 4c0 1.1 1.1 1.6 4.1 2.4l1.5.4c3.9 1 5.9 2.9 5.9 6 0 3.9-3.4 6.2-8.8 6.2-3.8 0-6.9-1.1-9-3.3l2.6-3c1.7 1.7 3.9 2.6 6.6 2.6 2.5 0 3.9-.8 3.9-2.1 0-1.1-1.1-1.7-4-2.4l-1.6-.4c-3.9-1-6-3-6-6C1.5.7 4.8-1.5 9.9-1.5c3.3 0 6.1.9 8.2 2.6z" fill="url(#logoGlossGradCard)" transform="translate(-1.5 1.5)"/></svg></div>
-        <span>Project Remark</span>
+  <!-- LOGIN SCREEN -->
+  <div id="login-screen">
+    <div class="login-left">
+      <div class="brand-pill">
+        <span style="font-size:16px;line-height:1">🌌</span>
+        <span>DevOrbit</span>
       </div>
-      <div id="auth-wrap"></div>
-    </div>
-  </div>
-</div>
-
-<!-- MAIN APP SHELL -->
-<div id="app">
-  <div id="sidebar-container"></div>
-  <div class="main">
-    <header class="topbar">
-      <div class="topbar-left">
-        <h2 class="sora" id="topbar-title"></h2>
-        <p id="topbar-sub"></p>
-      </div>
-      <div class="topbar-right">
-        <div class="avatar-btn" onclick="openProfile()" title="My profile">
-          <div class="avatar av-md" id="top-avatar"></div>
+      <h1 class="sora">Track Every<br /><span class="c1">Milestone.</span><br />Deliver with<br /><span
+          class="c2">Confidence.</span></h1>
+      <p class="tagline">One place to plan, track, and ship every project — from first commit to live deployment.</p>
+      <div class="feat-list">
+        <div class="feat-item">
+          <div class="feat-dot"></div>Full project lifecycle tracking
+        </div>
+        <div class="feat-item">
+          <div class="feat-dot"></div>GitHub & deployment URL management
+        </div>
+        <div class="feat-item">
+          <div class="feat-dot"></div>Interactive roadmap with GitHub release checks
+        </div>
+        <div class="feat-item">
+          <div class="feat-dot"></div>Live completion analytics & pie charts
         </div>
       </div>
-    </header>
-    <div class="content" id="content-container"></div>
-  </div>
-</div>
-
-<!-- OVERLAYS & MODALS -->
-<div id="profile-container"></div>
-<div id="tasks-container"></div>
-
-<div class="modal-overlay" id="del-modal">
-  <div class="modal-box">
-    <div class="modal-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-    <h3 class="sora">Delete Project?</h3>
-    <p id="del-modal-text"></p>
-    <div class="modal-actions">
-      <button class="modal-cancel" onclick="closeDelModal()">Cancel</button>
-      <button class="modal-confirm" onclick="confirmDelete()">Delete</button>
+    </div>
+    <div class="login-right">
+      <div class="login-card fade-up">
+        <div class="lc-brand">
+          <div class="lc-icon"><span style="font-size:15px;line-height:1">🌌</span></div>
+          <span>DevOrbit</span>
+        </div>
+        <div id="auth-wrap"></div>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Core Config & Storage -->
-<script src="js/config.js"></script>
-<script src="js/storage.js"></script>
+  <!-- MAIN APP SHELL -->
+  <div id="app">
+    <div id="sidebar-container"></div>
+    <div class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <h2 class="sora" id="topbar-title"></h2>
+          <p id="topbar-sub"></p>
+        </div>
+        <div class="topbar-right">
+          <div class="avatar-btn" onclick="openProfile()" title="My profile">
+            <div class="avatar av-md" id="top-avatar"></div>
+          </div>
+        </div>
+      </header>
+      <div class="content" id="content-container"></div>
+    </div>
+  </div>
 
-<!-- Component Modules -->
-<script src="js/components/sidebar.js"></script>
-<script src="js/components/profile.js"></script>
-<script src="js/components/tasks.js"></script>
+  <!-- OVERLAYS & MODALS -->
+  <div id="profile-container"></div>
+  <div id="tasks-container"></div>
 
-<!-- View Modules -->
-<script src="js/views/dashboard.js"></script>
-<script src="js/views/projects.js"></script>
-<script src="js/views/detail.js"></script>
-<script src="js/views/settings.js"></script>
+  <div class="modal-overlay" id="del-modal">
+    <div class="modal-box">
+      <div class="modal-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+      <h3 class="sora">Delete Project?</h3>
+      <p id="del-modal-text"></p>
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="closeDelModal()">Cancel</button>
+        <button class="modal-confirm" onclick="confirmDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
 
-<!-- App Routing & Entrypoint -->
-<script src="js/ui.js"></script>
-<script src="js/app.js" defer></script>
+  <!-- Core Config & Storage -->
+  <script src="js/config.js"></script>
+  <script src="js/storage.js"></script>
+
+  <!-- Component Modules -->
+  <script src="js/components/sidebar.js"></script>
+  <script src="js/components/profile.js"></script>
+  <script src="js/components/tasks.js"></script>
+
+  <!-- View Modules -->
+  <script src="js/views/dashboard.js"></script>
+  <script src="js/views/projects.js"></script>
+  <script src="js/views/detail.js"></script>
+  <script src="js/views/settings.js"></script>
+
+  <!-- App Routing & Entrypoint -->
+  <script src="js/ui.js"></script>
+  <script src="js/app.js" defer></script>
 </body>
+
 </html>

@@ -1,6 +1,6 @@
-# Project Remark
+# DevOrbit
 
-Project Remark is a single-page project tracking dashboard built with clean, component-based HTML, CSS, and JavaScript. It helps you organize projects from planning through GitHub and deployment, with a focused interface for progress, milestones, and delivery status.
+DevOrbit is a single-page project tracking dashboard built with clean, component-based HTML, CSS, and JavaScript. It helps you organize projects from planning through GitHub and deployment, with a focused interface for progress, milestones, and delivery status.
 
 ## Features
 

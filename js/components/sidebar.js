@@ -8,8 +8,8 @@ function renderSidebarComponent() {
       <div class="sb-top">
         <div class="sb-brand-row">
           <div class="sb-brand">
-            <div class="sb-icon"><svg class="remark-logo" viewBox="0 0 18 20" aria-hidden="true"><defs><linearGradient id="logoGlossGradSide" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#c7d2fe"/></linearGradient></defs><path d="M16 4.2C14.3 2.8 12.3 2.1 10 2.1 7.6 2.1 6.3 2.8 6.3 4c0 1.1 1.1 1.6 4.1 2.4l1.5.4c3.9 1 5.9 2.9 5.9 6 0 3.9-3.4 6.2-8.8 6.2-3.8 0-6.9-1.1-9-3.3l2.6-3c1.7 1.7 3.9 2.6 6.6 2.6 2.5 0 3.9-.8 3.9-2.1 0-1.1-1.1-1.7-4-2.4l-1.6-.4c-3.9-1-6-3-6-6C1.5.7 4.8-1.5 9.9-1.5c3.3 0 6.1.9 8.2 2.6z" fill="url(#logoGlossGradSide)" transform="translate(-1.5 1.5)"/></svg></div>
-            <span class="sb-title sora">Project Remark</span>
+            <div class="sb-icon"><span style="font-size:16px;line-height:1">🌌</span></div>
+            <span class="sb-title sora">DevOrbit</span>
           </div>
           <button class="collapse-btn" id="collapse-btn" onclick="toggleSidebar()" title="Collapse sidebar">
             <i class="fa-solid fa-chevron-left" id="collapse-icon"></i>
