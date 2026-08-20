@@ -253,7 +253,7 @@ function updateReminders() {
   const tasks = projects.filter(p => p.status === 'Processing' && p.steps.some(s => s.state === 'pending'));
   const badge = document.getElementById('tasks-badge');
   if (badge) { badge.textContent = tasks.length; badge.style.display = tasks.length ? '' : 'none'; }
-  
+
   const remList = document.getElementById('sb-rem-list');
   if (remList) {
     if (!tasks.length) {
@@ -287,7 +287,7 @@ function showPage(name) {
   document.getElementById('page-' + name).classList.add('active');
   const nav = document.getElementById('nav-' + name);
   if (nav) { nav.classList.add('active'); applyAccent(pickedColor); }
-  
+
   const $ = id => document.getElementById(id);
   if (name === 'dashboard') {
     lastCollectionPage = 'dashboard';
@@ -310,20 +310,84 @@ function showPage(name) {
 }
 
 /* ════════════════════════════════════
+   DRAG & DROP AUTO-SCROLL ENGINE
+════════════════════════════════════ */
+let isDraggingActive = false;
+let currentMouseY = 0;
+let dragScrollRaf = null;
+
+function runDragAutoScrollLoop() {
+  if (!isDraggingActive && !draggedProjectId) {
+    if (dragScrollRaf) cancelAnimationFrame(dragScrollRaf);
+    dragScrollRaf = null;
+    return;
+  }
+
+  const container = document.querySelector('.content');
+  if (container && currentMouseY > 0) {
+    const rect = container.getBoundingClientRect();
+    const threshold = 140; // 140px zone from top/bottom
+    const topZone = rect.top + threshold;
+    const bottomZone = rect.bottom - threshold;
+
+    if (currentMouseY < topZone) {
+      // Scroll UP
+      const distance = topZone - currentMouseY;
+      const speed = Math.min(35, Math.max(6, Math.round((distance / threshold) * 30)));
+      container.scrollTop -= speed;
+    } else if (currentMouseY > bottomZone) {
+      // Scroll DOWN
+      const distance = currentMouseY - bottomZone;
+      const speed = Math.min(35, Math.max(6, Math.round((distance / threshold) * 30)));
+      container.scrollTop += speed;
+    }
+  }
+
+  dragScrollRaf = requestAnimationFrame(runDragAutoScrollLoop);
+}
+
+document.addEventListener('dragover', e => {
+  if (isDraggingActive || draggedProjectId) {
+    currentMouseY = e.clientY;
+    if (!dragScrollRaf) {
+      dragScrollRaf = requestAnimationFrame(runDragAutoScrollLoop);
+    }
+  }
+});
+
+function stopDragScroll() {
+  isDraggingActive = false;
+  draggedProjectId = null;
+  currentMouseY = 0;
+  if (dragScrollRaf) {
+    cancelAnimationFrame(dragScrollRaf);
+    dragScrollRaf = null;
+  }
+  document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
+  document.querySelectorAll('.drop-zone-active').forEach(el => el.classList.remove('drop-zone-active'));
+}
+
+/* ════════════════════════════════════
    DRAG & DROP & SECTION MANAGEMENT
 ════════════════════════════════════ */
 function handleDragStart(e, id) {
   draggedProjectId = id;
+  isDraggingActive = true;
+  currentMouseY = e.clientY;
   if (e.dataTransfer) {
     e.dataTransfer.setData('text/plain', String(id));
     e.dataTransfer.effectAllowed = 'move';
   }
   const target = e.currentTarget;
   target.classList.add('dragging');
+  if (!dragScrollRaf) {
+    dragScrollRaf = requestAnimationFrame(runDragAutoScrollLoop);
+  }
 }
 
 function handleDragOver(e) {
   e.preventDefault();
+  currentMouseY = e.clientY;
   if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
   const box = e.currentTarget.closest('.custom-section-box');
   if (box) box.classList.add('drop-zone-active');
@@ -338,7 +402,7 @@ function handleDrop(e, targetSectionId) {
   e.preventDefault();
   const box = e.currentTarget.closest('.custom-section-box');
   if (box) box.classList.remove('drop-zone-active');
-  
+
   const idStr = e.dataTransfer ? e.dataTransfer.getData('text/plain') : String(draggedProjectId);
   const projId = Number(idStr || draggedProjectId);
   const p = projects.find(x => x.id === projId);
@@ -347,13 +411,13 @@ function handleDrop(e, targetSectionId) {
     saveProj(currentUser.username, projects);
     renderTable();
   }
+  stopDragScroll();
 }
 
 function handleDragEnd(e) {
-  document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
-  document.querySelectorAll('.drop-zone-active').forEach(el => el.classList.remove('drop-zone-active'));
-  draggedProjectId = null;
+  stopDragScroll();
 }
+
 
 function createCustomSection(e) {
   e.preventDefault();
@@ -508,7 +572,7 @@ function renderTable() {
   if (!tbody) return;
   const filtered = searchQuery
     ? projects.filter(p => p.name.toLowerCase().includes(searchQuery) ||
-        (p.desc && p.desc.toLowerCase().includes(searchQuery)))
+      (p.desc && p.desc.toLowerCase().includes(searchQuery)))
     : projects;
 
   if (!filtered.length) {
